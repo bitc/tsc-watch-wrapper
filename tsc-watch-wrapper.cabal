@@ -2,7 +2,7 @@ name:                tsc-watch-wrapper
 version:             0.1.0.0
 synopsis:            Enhanced TypeScript tsc "watch" functionality
 description:
-    This program will run the TypeScript compiler in \"watch\" mode (in the
+    This program will run the TypeScript compiler in "watch" mode (in the
     current directory). When any file changes, a new compilation will
     automatically be triggered: when this compilation completes, the callback
     program that you supplied will be run.
