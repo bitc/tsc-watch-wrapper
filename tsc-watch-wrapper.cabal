@@ -10,10 +10,17 @@ license:             MIT
 license-file:        LICENSE
 author:              Bit Connor
 maintainer:          mutantlemon@gmail.com
+copyright:           Bit Connor <mutantlemon@gmail.com>
+homepage:            https://github.com/bitc/tsc-watch-wrapper
+bug-reports:         https://github.com/bitc/tsc-watch-wrapper/issues
 category:            Development
 build-type:          Simple
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
+
+source-repository head
+  type:     git
+  location: https://github.com/bitc/tsc-watch-wrapper.git
 
 executable tsc-watch-wrapper
   main-is:             Main.hs
