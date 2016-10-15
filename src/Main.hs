@@ -23,13 +23,15 @@ import qualified Text.PrettyPrint.ANSI.Leijen as P
 
 data CallbackCmd = CallbackCmd String [String]
 type TscProg = String
+type SkipLibCheck = Bool
 
 data Options =
-    Options TscProg CallbackCmd
+    Options TscProg SkipLibCheck CallbackCmd
 
 parseOptions :: Parser Options
 parseOptions = Options
     <$> (strOption $ long "with-tsc" <> metavar "PROG" <> value "tsc" <> help "Path to the tsc executable. Default is \"tsc\"")
+    <*> (switch $ long "skipLibCheck" <> help "Pass this flag through to tsc. This is recommended since it significantly improves compile speed, but note that in rare cases it is unsafe")
     <*> (pure CallbackCmd <*> (argument str $ metavar "CALLBACK_PROG") <*> many (argument str $ metavar "CALLBACK_ARGS..."))
 
 parserInfo :: ParserInfo Options
@@ -52,13 +54,15 @@ parserInfo = info (helper <*> parseOptions)
     paragraph = P.fillSep . (map P.text) . words
 
 main :: IO ()
-main = execParser parserInfo >>= \(Options tscProg callbackCmd) -> do
+main = execParser parserInfo >>= \(Options tscProg skipLibCheck callbackCmd) -> do
     inTypeScriptProjectDir <- doesFileExist "tsconfig.json"
     when (not inTypeScriptProjectDir) $ do
         hPutStrLn stderr "You are not in a valid TypeScript project directory: no \"tsconfig.json\" file found"
         exitFailure
 
-    (_, Just hout, _, process) <- createProcess (proc tscProg ["--watch"])
+    let args = ["--watch"] ++ if skipLibCheck then ["--skipLibCheck"] else []
+
+    (_, Just hout, _, process) <- createProcess (proc tscProg args)
         { std_in = NoStream
         , std_out = CreatePipe
         , std_err = Inherit
