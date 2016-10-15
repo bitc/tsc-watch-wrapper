@@ -10,7 +10,8 @@ supplied will be run.
 ```
 tsc-watch-wrapper - Enhanced TypeScript tsc "watch" functionality
 
-Usage: tsc-watch-wrapper [--with-tsc PROG] CALLBACK_PROG [CALLBACK_ARGS...]
+Usage: tsc-watch-wrapper [--with-tsc PROG] [--skipLibCheck] CALLBACK_PROG
+                         [CALLBACK_ARGS...]
 
   CALLBACK_PROG            Program that will be called every time compilation
                            completes
@@ -20,6 +21,9 @@ Usage: tsc-watch-wrapper [--with-tsc PROG] CALLBACK_PROG [CALLBACK_ARGS...]
 Available options:
   -h,--help                Show this help text
   --with-tsc PROG          Path to the tsc executable. Default is "tsc"
+  --skipLibCheck           Pass this flag through to tsc. This is recommended
+                           since it significantly improves compile speed, but
+                           note that in rare cases it is unsafe
 
 This program will run the TypeScript compiler in "watch" mode (in the current
 directory). When any file changes, a new compilation will automatically be
