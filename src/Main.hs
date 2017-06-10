@@ -105,13 +105,15 @@ data CompilerState
     deriving (Show)
 
 data OutputLine
-    = OutputLine_CompilationComplete
+    = OutputLine_Blank
+    | OutputLine_CompilationComplete
     | OutputLine_FileChangeDetected
     | OutputLine_CompilerOutput B.ByteString
     deriving (Show)
 
 parseOutputLine :: B.ByteString -> OutputLine
 parseOutputLine line
+    | line == ""                                                                           = OutputLine_Blank
     | " - Compilation complete. Watching for file changes."          `BC8.isSuffixOf` line = OutputLine_CompilationComplete
     | " - File change detected. Starting incremental compilation..." `BC8.isSuffixOf` line = OutputLine_FileChangeDetected
     | otherwise                                                                            = OutputLine_CompilerOutput line
@@ -128,9 +130,11 @@ compilationResults :: (MonadThrow m) => Conduit B.ByteString m CompilationEvent
 compilationResults = C.concatMapAccumM (next . parseOutputLine) (Compiling [])
     where
     next :: MonadThrow m => OutputLine -> CompilerState -> m (CompilerState, [CompilationEvent])
+    next OutputLine_Blank                 (Compiling accum) = pure (Compiling accum, [])
     next OutputLine_CompilationComplete   (Compiling accum) = pure (CompilerWaiting, [CompilationComplete (reverse accum)])
     next OutputLine_FileChangeDetected    (Compiling _)     = throwM OutputParseException_UnexpectedFileChange
     next (OutputLine_CompilerOutput line) (Compiling accum) = pure (Compiling (line:accum), [])
+    next OutputLine_Blank                 CompilerWaiting   = pure (CompilerWaiting, [])
     next OutputLine_CompilationComplete   CompilerWaiting   = throwM OutputParseException_UnexpectedCompilationComplete
     next OutputLine_FileChangeDetected    CompilerWaiting   = pure (Compiling [], [CompilationStarted])
     next (OutputLine_CompilerOutput line) CompilerWaiting   = throwM (OutputParseException_UnexpectedCompilerOutput line)
